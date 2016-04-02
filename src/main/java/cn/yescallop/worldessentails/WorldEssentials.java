@@ -2,6 +2,7 @@ package cn.yescallop.worldessentials;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.player.PlayerGameModeChangeEvent;
 import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
@@ -18,9 +19,8 @@ import cn.nukkit.Server;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class WorldEssentials extends PluginBase implements Listener {
     
@@ -40,6 +40,7 @@ public class WorldEssentials extends PluginBase implements Listener {
         Level level;
         CommandSender target;
         Player player;
+        int gamemode;
         switch(cmd.getName()) {
             case "setworldgamemode":
                 if (args.length == 0) return false;
@@ -59,7 +60,7 @@ public class WorldEssentials extends PluginBase implements Listener {
                     level = ((Player) sender).getLevel();
                     gamemodeStr = args[0];
                 }
-                int gamemode = Server.getGamemodeFromString(gamemodeStr);
+                gamemode = Server.getGamemodeFromString(gamemodeStr);
                 if (gamemode == -1) {
                     sender.sendMessage(TextFormat.RED + "未知的游戏模式 '" + gamemodeStr + "'");
                     return true;
@@ -98,10 +99,11 @@ public class WorldEssentials extends PluginBase implements Listener {
                     return true;
                 }
                 player = (Player) target;
-                setPlayerLevelInfos(player);
-                player.teleport(getPlayerLevelSpawn(player, level));
-                player.setGamemode(getPlayerLevelGamemode(player, level));
-                player.getInventory().setContents(getPlayerLevelInventoryContents(player, level));
+                setPlayerInfos(player);
+                player.teleport(getPlayerSpawn(player, level));
+                gamemode = getPlayerGamemode(player, level);
+                player.setGamemode(gamemode);
+                player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, level));
                 break;
             case "spawn":
                 if (!(sender instanceof Player)) {
@@ -118,13 +120,27 @@ public class WorldEssentials extends PluginBase implements Listener {
     
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        Location from = event.getFrom();
-        Location to = event.getTo();
-        if (!from.getLevel().equals(to.getLevel())) setPlayerLevelInfos(event.getPlayer());
+        if (!event.isCancelled()) {
+            Location from = event.getFrom();
+            Location to = event.getTo();
+            if (!from.getLevel().equals(to.getLevel())) setPlayerInfos(event.getPlayer());
+        }
     }
     
-    private Location getPlayerLevelSpawn(Player player, Level level) {
-        LinkedHashMap<String, Object> infos = (LinkedHashMap<String, Object>) getPlayerLevelConfig(player, level).getAll();
+    @EventHandler
+    public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
+        if (!event.isCancelled()) {
+            Player player = event.getPlayer();
+            Config playerConfig = getPlayerConfig(player, player.getLevel());
+            playerConfig.set("inventories", getPlayerInventories(player, player.getLevel()));
+            playerConfig.save();
+            int gamemode = event.getNewGamemode();
+            player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, player.getLevel()));
+        }
+    }
+    
+    private Location getPlayerSpawn(Player player, Level level) {
+        LinkedHashMap<String, Object> infos = (LinkedHashMap<String, Object>) getPlayerConfig(player, level).getAll();
         Vector3 pos;
         if (infos.size() == 0) {
             pos = level.getSafeSpawn();
@@ -138,7 +154,7 @@ public class WorldEssentials extends PluginBase implements Listener {
         Config levelConfig = getLevelConfig(level);
         levelConfig.set("gamemode", gamemode);
         levelConfig.save();
-        for (Config playerConfig : getPlayerLevelConfigs(level)) {
+        for (Config playerConfig : getLevelPlayerConfigs(level)) {
             playerConfig.set("gamemode", gamemode);
             playerConfig.save();
         }
@@ -147,13 +163,26 @@ public class WorldEssentials extends PluginBase implements Listener {
         }
     }
     
-    private int getPlayerLevelGamemode(Player player, Level level) {
-        return getPlayerLevelConfig(player, level).getInt("gamemode", getLevelGamemode(level));
+    private int getPlayerGamemode(Player player, Level level) {
+        return getPlayerConfig(player, level).getInt("gamemode", getLevelGamemode(level));
     }
     
-    private Map<Integer, Item> getPlayerLevelInventoryContents(Player player, Level level) {
-        HashMap<Integer, ArrayList<Integer>> inventory  = (HashMap<Integer, ArrayList<Integer>>) getPlayerLevelConfig(player, level).get("inventory", new HashMap<Integer, ArrayList<Integer>>());
-        HashMap<Integer, Item> contents = new HashMap<Integer, Item>();
+    private LinkedHashMap<Integer, Item> getPlayerInventoryContents(Player player, int gamemode, Level level) {
+        LinkedHashMap<String, LinkedHashMap<Integer, ArrayList<Integer>>> inventories = (LinkedHashMap<String, LinkedHashMap<Integer, ArrayList<Integer>>>) getPlayerConfig(player, level).get("inventories");
+        if (inventories == null) return new LinkedHashMap<>();
+        LinkedHashMap<Integer, ArrayList<Integer>> inventory;
+        switch (gamemode) {
+            case 0:
+                inventory = (LinkedHashMap<Integer, ArrayList<Integer>>) inventories.get("survival");
+                break;
+            case 1:
+                inventory = (LinkedHashMap<Integer, ArrayList<Integer>>) inventories.get("creative");
+                break;
+            default:
+                return new LinkedHashMap<>();
+        }
+        if (inventory == null) return new LinkedHashMap<>();
+        LinkedHashMap<Integer, Item> contents = new LinkedHashMap<Integer, Item>();
         for (Map.Entry entry : inventory.entrySet()) {
             Integer[] item = (Integer[]) ((ArrayList<Integer>) entry.getValue()).toArray(new Integer[]{});
             contents.put((Integer) entry.getKey(), Item.get((int) item[0], (int) item[1], (int) item[2]));
@@ -165,35 +194,49 @@ public class WorldEssentials extends PluginBase implements Listener {
         return getLevelConfig(level).getInt("gamemode", this.getServer().getDefaultGamemode());
     }
     
-    private void setPlayerLevelInfos(Player player) {
-        HashMap<Integer, Integer[]> inventory = new HashMap<Integer, Integer[]>();
-        for (Map.Entry entry : player.getInventory().getContents().entrySet()) {
-            Item item = (Item) entry.getValue();
-            inventory.put((Integer) entry.getKey(), new Integer[]{item.getId(), item.getDamage(), item.getCount()});
-        }
+    private void setPlayerInfos(Player player) {
+        Config playerConfig = getPlayerConfig(player, player.getLevel());
         LinkedHashMap<String, Object> infos = new LinkedHashMap<String, Object>(){
             {
             put("x", player.x);
             put("y", player.y);
             put("z", player.z);
-            put("inventory", inventory);
+            put("inventories", getPlayerInventories(player, player.getLevel()));
             put("gamemode", player.getGamemode());
             }
         };
-        Config playerConfig = getPlayerLevelConfig(player, player.getLevel());
         playerConfig.setAll(infos);
         playerConfig.save();
+    }
+    
+    private LinkedHashMap<String, LinkedHashMap<Integer, Object>> getPlayerInventories(Player player, Level level) {
+        LinkedHashMap<Integer, Object> inventory = new LinkedHashMap<Integer, Object>();
+        for (Map.Entry entry : player.getInventory().getContents().entrySet()) {
+            Item item = (Item) entry.getValue();
+            inventory.put((int) entry.getKey(), new int[]{item.getId(), item.getDamage(), item.getCount()});
+        }
+        Config playerConfig = getPlayerConfig(player, player.getLevel());
+        LinkedHashMap<String, LinkedHashMap<Integer, Object>> inventories = (LinkedHashMap<String, LinkedHashMap<Integer, Object>>) playerConfig.get("inventories", new LinkedHashMap<String, LinkedHashMap<Integer, Object>>());
+        switch (player.getGamemode()) {
+            case 0:
+                inventories.put("survival", inventory);
+                break;
+            case 1:
+                inventories.put("creative", inventory);
+                break;
+        }
+        return inventories;
     }
     
     private Config getLevelConfig(Level level) {
         return new Config(new File(worldsFolder, level.getName() + ".yml"), Config.YAML);
     }
     
-    private Config getPlayerLevelConfig(Player player, Level level) {
+    private Config getPlayerConfig(Player player, Level level) {
         return new Config(new File(getLevelFolder(level), player.getName().toLowerCase() + ".yml"), Config.YAML);
     }
     
-    private Config[] getPlayerLevelConfigs(Level level) {
+    private Config[] getLevelPlayerConfigs(Level level) {
         File[] files = getLevelFolder(level).listFiles();
         ArrayList<Config> configs = new ArrayList<Config>();
         for (File file : files) {
