@@ -152,11 +152,11 @@ public class WorldEssentials extends PluginBase implements Listener {
     }
     
     private Map<Integer, Item> getPlayerLevelInventoryContents(Player player, Level level) {
-        HashMap<Integer, ArrayList<Object>> inventory  = (HashMap<Integer, ArrayList<Object>>) getPlayerLevelConfig(player, level).get("inventory", new HashMap<Integer, ArrayList<Object>>());
+        HashMap<Integer, ArrayList<Integer>> inventory  = (HashMap<Integer, ArrayList<Integer>>) getPlayerLevelConfig(player, level).get("inventory", new HashMap<Integer, ArrayList<Integer>>());
         HashMap<Integer, Item> contents = new HashMap<Integer, Item>();
         for (Map.Entry entry : inventory.entrySet()) {
-            Object[] item = (Object[]) ((ArrayList<Object>) entry.getValue()).toArray(new Object[]{});
-            contents.put((Integer) entry.getKey(), new Item((int) item[0], (int) item[1], (int) item[2], (String) item[3]));
+            Integer[] item = (Integer[]) ((ArrayList<Integer>) entry.getValue()).toArray(new Integer[]{});
+            contents.put((Integer) entry.getKey(), Item.get((int) item[0], (int) item[1], (int) item[2]));
         }
         return contents;
     }
@@ -166,10 +166,10 @@ public class WorldEssentials extends PluginBase implements Listener {
     }
     
     private void setPlayerLevelInfos(Player player) {
-        HashMap<Integer, Object[]> inventory = new HashMap<Integer, Object[]>();
+        HashMap<Integer, Integer[]> inventory = new HashMap<Integer, Integer[]>();
         for (Map.Entry entry : player.getInventory().getContents().entrySet()) {
             Item item = (Item) entry.getValue();
-            inventory.put((Integer) entry.getKey(), new Object[]{item.getId(), item.getDamage(), item.getCount(), item.getName()});
+            inventory.put((Integer) entry.getKey(), new Integer[]{item.getId(), item.getDamage(), item.getCount()});
         }
         LinkedHashMap<String, Object> infos = new LinkedHashMap<String, Object>(){
             {
