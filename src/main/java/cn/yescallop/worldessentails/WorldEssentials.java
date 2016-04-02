@@ -6,6 +6,7 @@ import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.TranslationContainer;
+import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
@@ -17,7 +18,9 @@ import cn.nukkit.Server;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class WorldEssentials extends PluginBase implements Listener {
     
@@ -100,6 +103,7 @@ public class WorldEssentials extends PluginBase implements Listener {
                 setPlayerLevelInfos(player);
                 player.teleport(getPlayerLevelSpawn(player, level));
                 player.setGamemode(getPlayerLevelGamemode(player, level));
+                player.getInventory().setContents(getPlayerLevelInventoryContents(player, level));
                 break;
             case "spawn":
                 if (!(sender instanceof Player)) {
@@ -146,16 +150,32 @@ public class WorldEssentials extends PluginBase implements Listener {
         return getPlayerLevelConfig(player, level).getInt("gamemode", getLevelGamemode(level));
     }
     
+    private Map<Integer, Item> getPlayerLevelInventoryContents(Player player, Level level) {
+        HashMap<Integer, ArrayList<Object>> inventory  = (HashMap<Integer, ArrayList<Object>>) getPlayerLevelConfig(player, level).get("inventory", new HashMap<Integer, ArrayList<Object>>());
+        HashMap<Integer, Item> contents = new HashMap<Integer, Item>();
+        for (Map.Entry entry : inventory.entrySet()) {
+            Object[] item = (Object[]) ((ArrayList<Object>) entry.getValue()).toArray(new Object[]{});
+            contents.put((Integer) entry.getKey(), new Item((int) item[0], (int) item[1], (int) item[2], (String) item[3]));
+        }
+        return contents;
+    }
+    
     private int getLevelGamemode(Level level) {
         return getLevelConfig(level).getInt("gamemode", this.getServer().getDefaultGamemode());
     }
     
     private void setPlayerLevelInfos(Player player) {
+        HashMap<Integer, Object[]> inventory = new HashMap<Integer, Object[]>();
+        for (Map.Entry entry : player.getInventory().getContents().entrySet()) {
+            Item item = (Item) entry.getValue();
+            inventory.put((Integer) entry.getKey(), new Object[]{item.getId(), item.getDamage(), item.getCount(), item.getName()});
+        }
         LinkedHashMap<String, Object> infos = new LinkedHashMap<String, Object>(){
             {
             put("x", player.x);
             put("y", player.y);
             put("z", player.z);
+            put("inventory", inventory);
             put("gamemode", player.getGamemode());
             }
         };
