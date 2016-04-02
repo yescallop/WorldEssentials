@@ -67,7 +67,6 @@ public class WorldEssentials extends PluginBase implements Listener {
                 }
                 setLevelGamemode(level, gamemode);
                 for (Player levelPlayer : level.getPlayers().values()) {
-                    levelPlayer.setGamemode(gamemode);
                     levelPlayer.sendMessage("此世界的游戏模式已被设置为 " + Server.getGamemodeString(gamemode));
                 }
                 sender.sendMessage("世界 '" + level.getName() + "' 的游戏模式已被设置为 " + Server.getGamemodeString(gamemode));
@@ -141,8 +140,11 @@ public class WorldEssentials extends PluginBase implements Listener {
         levelConfig.set("gamemode", gamemode);
         levelConfig.save();
         for (Config playerConfig : getPlayerLevelConfigs(level)) {
-            playerConfig.remove("gamemode");
+            playerConfig.set("gamemode", gamemode);
             playerConfig.save();
+        }
+        for (Player levelPlayer : level.getPlayers().values()) {
+            levelPlayer.setGamemode(gamemode);
         }
     }
     
