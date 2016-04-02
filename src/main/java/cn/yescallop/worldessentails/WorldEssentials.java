@@ -25,7 +25,6 @@ import java.util.Map;
 public class WorldEssentials extends PluginBase implements Listener {
     
     private File worldsFolder;
-    private File playersFolder;
     
     @Override
     public void onEnable() {
