@@ -80,12 +80,12 @@ public class WorldEssentials extends PluginBase implements Listener {
                         sender.sendMessage(new TranslationContainer(TextFormat.RED + "%commands.generic.permission"));
                         return true;
                     }
-                    target = this.getServer().getPlayer(args[0]);
+                    target = this.getServer().getPlayer(args[1]);
                     if (target == null) {
-                        sender.sendMessage(TextFormat.RED + "玩家 '" + args[0] + "' 不存在");
+                        sender.sendMessage(TextFormat.RED + "玩家 '" + args[1] + "' 不存在");
                         return true;
                     }
-                    levelStr = args[1];
+                    levelStr = args[0];
                 } else {
                     if (!(sender instanceof Player)) {
                         sender.sendMessage(TextFormat.RED + "你只能在游戏中执行此命令");
