@@ -125,7 +125,7 @@ public class WorldEssentials extends PluginBase implements Listener {
             Location to = event.getTo();
             Player player = event.getPlayer();
             if (!from.level.equals(to.level)) setPlayerInfos(player);
-            gamemode = getPlayerGamemode(player, to.level);
+            int gamemode = getPlayerGamemode(player, to.level);
             player.setGamemode(gamemode);
             player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, to.level));
         }
