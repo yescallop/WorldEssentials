@@ -32,7 +32,7 @@ public class WorldEssentials extends PluginBase implements Listener {
         this.getServer().getPluginManager().registerEvents(this, this);
         lang = new BaseLang(this.getServer().getLanguage().getLang());
         CommandManager.registerAll(this);
-        this.getLogger().info("WorldEssentials 加载成功！");
+        this.getLogger().info(lang.translateString("worldessentials.loaded"));
     }
 
     @EventHandler
