@@ -1,12 +1,9 @@
 package cn.yescallop.worldessentials;
 
-import cn.nukkit.command.Command;
-import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.player.PlayerGameModeChangeEvent;
 import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
-import cn.nukkit.event.TranslationContainer;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
@@ -23,10 +20,10 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 
 public class WorldEssentials extends PluginBase implements Listener {
-    
+
     private File worldsFolder;
     private BaseLang lang;
-    
+
     @Override
     public void onEnable() {
         this.getDataFolder().mkdirs();
@@ -37,7 +34,7 @@ public class WorldEssentials extends PluginBase implements Listener {
         CommandManager.registerAll(this);
         this.getLogger().info("WorldEssentials 加载成功！");
     }
-    
+
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if (!event.isCancelled()) {
@@ -50,7 +47,7 @@ public class WorldEssentials extends PluginBase implements Listener {
             player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, to.level));
         }
     }
-    
+
     @EventHandler
     public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
         if (!event.isCancelled()) {
@@ -124,13 +121,13 @@ public class WorldEssentials extends PluginBase implements Listener {
 
     public void setPlayerInfos(Player player) {
         Config playerConfig = getPlayerConfig(player, player.getLevel());
-        LinkedHashMap<String, Object> infos = new LinkedHashMap<String, Object>(){
+        LinkedHashMap<String, Object> infos = new LinkedHashMap<String, Object>() {
             {
-            put("x", player.x);
-            put("y", player.y);
-            put("z", player.z);
-            put("inventories", getPlayerInventories(player, player.getLevel()));
-            put("gamemode", player.getGamemode());
+                put("x", player.x);
+                put("y", player.y);
+                put("z", player.z);
+                put("inventories", getPlayerInventories(player, player.getLevel()));
+                put("gamemode", player.getGamemode());
             }
         };
         playerConfig.setAll(infos);
