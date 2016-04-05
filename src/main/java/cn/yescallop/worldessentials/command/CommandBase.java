@@ -2,6 +2,7 @@ package cn.yescallop.worldessentials.command;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.PluginIdentifiableCommand;
+
 import cn.yescallop.worldessentials.lang.BaseLang;
 import cn.yescallop.worldessentials.WorldEssentials;
 
@@ -15,7 +16,7 @@ public abstract class CommandBase extends Command implements PluginIdentifiableC
         this.lang = plugin.getLanguage();
         this.description = lang.translateString("commands." + name + ".description");
         String usageMessage = lang.translateString("commands." + name + ".usage");
-        this.usageMessage = usageMessage == null ? "/" + name : usageMessage;
+        this.usageMessage = usageMessage.equals("commands." + name + ".usage") ? "/" + name : usageMessage;
         this.setPermission("worldessentials.command." + name);
         this.plugin = plugin;
     }

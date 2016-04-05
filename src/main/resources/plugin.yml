@@ -4,38 +4,3 @@ api: ["1.0.0"]
 author: Scallop
 description: Essentials for Worlds
 main: cn.yescallop.worldessentials.WorldEssentials
-
-commands:
- setworldgamemode:
-  description: "设置世界的游戏模式"
-  usage: "/setworldgamemode <模式> [世界]"
-  permission: worldessentials.command.setworldgamemode
- tpw:
-  description: "传送指定玩家（或是自己）到指定的世界"
-  usage: "/tpw <世界> [玩家]"
-  permission: worldessentials.command.tpw
- spawn:
-  description: "传送自己到当前世界的出生点"
-  usage: "/spawn"
-  permission: worldessentials.command.spawn
-  
-permissions:
-  worldessentials:
-   description: "允许使用 WorldEssentials"
-   children:
-    worldessentials.command:
-     description: "允许使用 WorldEssentials 指令"
-     children:
-      worldessentials.command.setworldgamemode:
-       description: "允许使用 /setworldgamemode 指令"
-       default: op
-      worldessentials.command.tpw:
-       description: "允许使用 /tpw 指令"
-       default: true
-       children:
-        worldessentials.command.tpw.other:
-         description: "允许对其他玩家使用 /tpw 指令"
-         default: op
-      worldessentials.command.spawn:
-       description: "允许使用 /spawn 指令"
-       default: true

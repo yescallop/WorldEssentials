@@ -5,6 +5,7 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.TranslationContainer;
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.TextFormat;
+
 import cn.yescallop.worldessentials.WorldEssentials;
 import cn.yescallop.worldessentials.command.CommandBase;
 
@@ -15,7 +16,13 @@ public class TpwCommand extends CommandBase {
     }
 
     public boolean execute(CommandSender sender, String label, String[] args) {
-        if (args.length == 0) return false;
+        if (!this.testPermission(sender)) {
+            return true;
+        }
+        if (args.length == 0) {
+            sender.sendMessage(new TranslationContainer("commands.generic.usage", this.usageMessage));
+            return false;
+        }
         CommandSender target = sender;
         String levelStr;
         if (args.length > 1) {
@@ -31,7 +38,7 @@ public class TpwCommand extends CommandBase {
             levelStr = args[0];
         } else {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.onlyInGame"));
+                sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.onlyPlayer"));
                 return true;
             }
             levelStr = args[0];
