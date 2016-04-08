@@ -1,6 +1,21 @@
 name: WorldEssentials
-version: "1.2.2"
+version: "1.2.3"
 api: ["1.0.0"]
 author: Scallop
 description: Essentials for Worlds
 main: cn.yescallop.worldessentials.WorldEssentials
+
+permissions:
+ worldessentials.command.tpw.*:
+  description: "Allows the user to use /tpw command"
+  default: true
+  children:
+   worldessentials.command.tpw.other:
+    description: "Allows the user to use /tpw command on the other"
+    default: op
+ worldessentials.command.setworldgamemode:
+  description: "Allows the user to use /setworldgamemode command"
+  default: op
+ worldessentials.command.spawn:
+  description: "Allows the user to use /spawn command"
+  default: true
