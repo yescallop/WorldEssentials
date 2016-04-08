@@ -51,10 +51,10 @@ public class WorldEssentials extends PluginBase implements Listener {
     public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
         Player player = event.getPlayer();
         Config playerConfig = getPlayerConfig(player, player.getLevel());
-            playerConfig.set("inventories", getPlayerInventories(player, player.getLevel()));
-            playerConfig.save();
-            int gamemode = event.getNewGamemode();
-            player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, player.getLevel()));
+        playerConfig.set("inventories", getPlayerInventories(player, player.getLevel()));
+        playerConfig.save();
+        int gamemode = event.getNewGamemode();
+        player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, player.getLevel()));
     }
 
     public BaseLang getLanguage() {
