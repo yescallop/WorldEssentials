@@ -1,26 +1,21 @@
 package cn.yescallop.worldessentials;
 
-import cn.nukkit.event.player.PlayerGameModeChangeEvent;
-import cn.nukkit.event.player.PlayerTeleportEvent;
-import cn.nukkit.event.EventHandler;
-import cn.nukkit.event.Listener;
+import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
-import cn.nukkit.Player;
-
 import cn.yescallop.worldessentials.command.CommandManager;
 import cn.yescallop.worldessentials.lang.BaseLang;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class WorldEssentials extends PluginBase implements Listener {
+public class WorldEssentials extends PluginBase {
 
     private File worldsFolder;
     private BaseLang lang;
@@ -30,31 +25,10 @@ public class WorldEssentials extends PluginBase implements Listener {
         this.getDataFolder().mkdirs();
         worldsFolder = new File(this.getDataFolder(), "worlds");
         worldsFolder.mkdirs();
-        this.getServer().getPluginManager().registerEvents(this, this);
+        this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
         lang = new BaseLang(this.getServer().getLanguage().getLang());
         CommandManager.registerAll(this);
         this.getLogger().info(lang.translateString("worldessentials.loaded"));
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
-        Location from = event.getFrom();
-        Location to = event.getTo();
-        Player player = event.getPlayer();
-        if (!from.level.equals(to.level)) setPlayerInfos(player);
-        int gamemode = getPlayerGamemode(player, to.level);
-        player.setGamemode(gamemode);
-        player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, to.level));
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
-        Player player = event.getPlayer();
-        Config playerConfig = getPlayerConfig(player, player.getLevel());
-        playerConfig.set("inventories", getPlayerInventories(player, player.getLevel()));
-        playerConfig.save();
-        int gamemode = event.getNewGamemode();
-        player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, player.getLevel()));
     }
 
     public BaseLang getLanguage() {
@@ -95,21 +69,34 @@ public class WorldEssentials extends PluginBase implements Listener {
         LinkedHashMap<Integer, ArrayList<Integer>> inventory;
         switch (gamemode) {
             case 0:
-                inventory = (LinkedHashMap<Integer, ArrayList<Integer>>) inventories.get("survival");
+                inventory = inventories.get("survival");
                 break;
             case 1:
-                inventory = (LinkedHashMap<Integer, ArrayList<Integer>>) inventories.get("creative");
+                inventory = inventories.get("creative");
                 break;
             default:
                 return new LinkedHashMap<>();
         }
         if (inventory == null) return new LinkedHashMap<>();
-        LinkedHashMap<Integer, Item> contents = new LinkedHashMap<Integer, Item>();
+        LinkedHashMap<Integer, Item> contents = new LinkedHashMap<>();
         for (Map.Entry entry : inventory.entrySet()) {
-            Integer[] item = (Integer[]) ((ArrayList<Integer>) entry.getValue()).toArray(new Integer[]{});
-            contents.put((Integer) entry.getKey(), Item.get((int) item[0], (int) item[1], (int) item[2]));
+            Integer[] item = ((ArrayList<Integer>) entry.getValue()).toArray(new Integer[]{});
+            contents.put((Integer) entry.getKey(), Item.get(item[0], item[1], item[2]));
         }
         return contents;
+    }
+
+    public void setLevelGamerule(Level level, String gamerule, Object value) {
+        Config levelConfig = getLevelConfig(level);
+        LinkedHashMap<String, Object> gamerules = levelConfig.get("gamerules", new LinkedHashMap<>());
+        gamerules.put(gamerule, value);
+        levelConfig.set("gamerules", gamerules);
+        levelConfig.save();
+    }
+
+    public boolean getLevelBooleanGamerule(Level level, String gamerule) {
+        LinkedHashMap<String, Object> gamerules = getLevelConfig(level).get("gamerules", new LinkedHashMap<>());
+        return Boolean.parseBoolean((String) gamerules.get(gamerule));
     }
 
     public int getLevelGamemode(Level level) {
@@ -132,13 +119,13 @@ public class WorldEssentials extends PluginBase implements Listener {
     }
 
     public LinkedHashMap<String, LinkedHashMap<Integer, Object>> getPlayerInventories(Player player, Level level) {
-        LinkedHashMap<Integer, Object> inventory = new LinkedHashMap<Integer, Object>();
+        LinkedHashMap<Integer, Object> inventory = new LinkedHashMap<>();
         for (Map.Entry entry : player.getInventory().getContents().entrySet()) {
             Item item = (Item) entry.getValue();
             inventory.put((int) entry.getKey(), new int[]{item.getId(), item.getDamage(), item.getCount()});
         }
         Config playerConfig = getPlayerConfig(player, player.getLevel());
-        LinkedHashMap<String, LinkedHashMap<Integer, Object>> inventories = (LinkedHashMap<String, LinkedHashMap<Integer, Object>>) playerConfig.get("inventories", new LinkedHashMap<String, LinkedHashMap<Integer, Object>>());
+        LinkedHashMap<String, LinkedHashMap<Integer, Object>> inventories = playerConfig.get("inventories", new LinkedHashMap<>());
         switch (player.getGamemode()) {
             case 0:
                 inventories.put("survival", inventory);
@@ -160,11 +147,11 @@ public class WorldEssentials extends PluginBase implements Listener {
 
     public Config[] getLevelPlayerConfigs(Level level) {
         File[] files = getLevelFolder(level).listFiles();
-        ArrayList<Config> configs = new ArrayList<Config>();
+        ArrayList<Config> configs = new ArrayList<>();
         for (File file : files) {
             configs.add(new Config(file, Config.YAML));
         }
-        return (Config[]) configs.toArray(new Config[]{});
+        return configs.toArray(new Config[]{});
     }
 
     public File getLevelFolder(Level level) {
