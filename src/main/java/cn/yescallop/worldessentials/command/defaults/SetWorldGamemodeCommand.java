@@ -3,8 +3,10 @@ package cn.yescallop.worldessentials.command.defaults;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.TranslationContainer;
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.TextFormat;
+
 import cn.yescallop.worldessentials.WorldEssentials;
 import cn.yescallop.worldessentials.command.CommandBase;
 
@@ -15,7 +17,13 @@ public class SetWorldGamemodeCommand extends CommandBase {
     }
 
     public boolean execute(CommandSender sender, String label, String[] args) {
-        if (args.length == 0) return false;
+        if (!this.testPermission(sender)) {
+            return true;
+        }
+        if (args.length == 0) {
+            sender.sendMessage(new TranslationContainer("commands.generic.usage", this.usageMessage));
+            return false;
+        }
         String gamemodeStr;
         Level level;
         if (args.length > 1) {

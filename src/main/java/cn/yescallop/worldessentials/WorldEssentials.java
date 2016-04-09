@@ -11,6 +11,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import cn.nukkit.Player;
+
 import cn.yescallop.worldessentials.command.CommandManager;
 import cn.yescallop.worldessentials.lang.BaseLang;
 
@@ -32,32 +33,28 @@ public class WorldEssentials extends PluginBase implements Listener {
         this.getServer().getPluginManager().registerEvents(this, this);
         lang = new BaseLang(this.getServer().getLanguage().getLang());
         CommandManager.registerAll(this);
-        this.getLogger().info("WorldEssentials 加载成功！");
+        this.getLogger().info(lang.translateString("worldessentials.loaded"));
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (!event.isCancelled()) {
-            Location from = event.getFrom();
-            Location to = event.getTo();
-            Player player = event.getPlayer();
-            if (!from.level.equals(to.level)) setPlayerInfos(player);
-            int gamemode = getPlayerGamemode(player, to.level);
-            player.setGamemode(gamemode);
-            player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, to.level));
-        }
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        Player player = event.getPlayer();
+        if (!from.level.equals(to.level)) setPlayerInfos(player);
+        int gamemode = getPlayerGamemode(player, to.level);
+        player.setGamemode(gamemode);
+        player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, to.level));
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
-        if (!event.isCancelled()) {
-            Player player = event.getPlayer();
-            Config playerConfig = getPlayerConfig(player, player.getLevel());
-            playerConfig.set("inventories", getPlayerInventories(player, player.getLevel()));
-            playerConfig.save();
-            int gamemode = event.getNewGamemode();
-            player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, player.getLevel()));
-        }
+        Player player = event.getPlayer();
+        Config playerConfig = getPlayerConfig(player, player.getLevel());
+        playerConfig.set("inventories", getPlayerInventories(player, player.getLevel()));
+        playerConfig.save();
+        int gamemode = event.getNewGamemode();
+        player.getInventory().setContents(getPlayerInventoryContents(player, gamemode, player.getLevel()));
     }
 
     public BaseLang getLanguage() {
