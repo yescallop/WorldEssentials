@@ -22,7 +22,8 @@ public class EventListener implements Listener {
         Location from = event.getFrom();
         Location to = event.getTo();
         Player player = event.getPlayer();
-        if (!from.level.equals(to.level)) plugin.setPlayerInfos(player);
+        if (from.level.equals(to.level)) return;
+        plugin.setPlayerInfos(player);
         int gamemode = plugin.getPlayerGamemode(player, to.level);
         player.setGamemode(gamemode);
         player.getInventory().setContents(plugin.getPlayerInventoryContents(player, gamemode, to.level));
@@ -40,6 +41,9 @@ public class EventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDeath(PlayerDeathEvent event) {
-        if (plugin.getLevelBooleanGamerule(event.getEntity().getLevel(), "keepInventory")) event.setKeepInventory(true);
+        if (plugin.getLevelBooleanGamerule(event.getEntity().getLevel(), "keepInventory")) {
+            event.setKeepInventory(true);
+            event.setKeepExperience(true);
+        }
     }
 }

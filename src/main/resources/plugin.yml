@@ -6,6 +6,9 @@ description: Essentials for Worlds
 main: cn.yescallop.worldessentials.WorldEssentials
 
 permissions:
+ worldessentials.command.gamerule:
+  description: "Allows the user to use /gamerule command"
+  default: op
  worldessentials.command.tpw.*:
   description: "Allows the user to use /tpw command"
   default: true

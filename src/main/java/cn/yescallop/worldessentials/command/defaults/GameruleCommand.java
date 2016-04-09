@@ -40,7 +40,7 @@ public class GameruleCommand extends CommandBase {
         Object value;
         switch (args[0]) {
             case "keepInventory":
-                switch (args[0]) {
+                switch (args[1]) {
                     case "true":
                         value = true;
                         break;
@@ -48,7 +48,7 @@ public class GameruleCommand extends CommandBase {
                         value = false;
                         break;
                     default:
-                        sender.sendMessage(lang.translateString("commands.gamerule.notBoolean", args[0]));
+                        sender.sendMessage(lang.translateString("commands.gamerule.notBoolean", args[1]));
                         return true;
                 }
                 plugin.setLevelGamerule(level, args[0], value);

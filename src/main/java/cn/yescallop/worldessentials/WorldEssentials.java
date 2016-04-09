@@ -96,7 +96,8 @@ public class WorldEssentials extends PluginBase {
 
     public boolean getLevelBooleanGamerule(Level level, String gamerule) {
         LinkedHashMap<String, Object> gamerules = getLevelConfig(level).get("gamerules", new LinkedHashMap<>());
-        return Boolean.parseBoolean((String) gamerules.get(gamerule));
+        Object gameruleObj = gamerules.get(gamerule);
+        return gameruleObj == null ? false : (boolean) gameruleObj;
     }
 
     public int getLevelGamemode(Level level) {
