@@ -80,8 +80,8 @@ public class WorldEssentials extends PluginBase {
         if (inventory == null) return new LinkedHashMap<>();
         LinkedHashMap<Integer, Item> contents = new LinkedHashMap<>();
         for (Map.Entry entry : inventory.entrySet()) {
-            Integer[] item = ((ArrayList<Integer>) entry.getValue()).toArray(new Integer[]{});
-            contents.put((Integer) entry.getKey(), Item.get(item[0], item[1], item[2]));
+            ArrayList<Integer> item = (ArrayList<Integer>) entry.getValue();
+            contents.put((Integer) entry.getKey(), Item.get(item.get(0), item.get(1), item.get(2)));
         }
         return contents;
     }
@@ -96,8 +96,7 @@ public class WorldEssentials extends PluginBase {
 
     public boolean getLevelBooleanGamerule(Level level, String gamerule) {
         LinkedHashMap<String, Object> gamerules = getLevelConfig(level).get("gamerules", new LinkedHashMap<>());
-        Object gameruleObj = gamerules.get(gamerule);
-        return gameruleObj == null ? false : (boolean) gameruleObj;
+        return (boolean) gamerules.getOrDefault(gamerule, false);
     }
 
     public int getLevelGamemode(Level level) {

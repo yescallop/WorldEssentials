@@ -2,9 +2,8 @@ package cn.yescallop.worldessentials.command;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.PluginIdentifiableCommand;
-
-import cn.yescallop.worldessentials.lang.BaseLang;
 import cn.yescallop.worldessentials.WorldEssentials;
+import cn.yescallop.worldessentials.lang.BaseLang;
 
 public abstract class CommandBase extends Command implements PluginIdentifiableCommand {
 
