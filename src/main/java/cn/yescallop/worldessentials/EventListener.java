@@ -1,12 +1,13 @@
 package cn.yescallop.worldessentials;
 
 import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
+import cn.nukkit.event.entity.EntityLevelChangeEvent;
 import cn.nukkit.event.player.PlayerDeathEvent;
 import cn.nukkit.event.player.PlayerGameModeChangeEvent;
-import cn.nukkit.event.player.PlayerTeleportEvent;
-import cn.nukkit.level.Location;
+import cn.nukkit.level.Level;
 import cn.nukkit.utils.Config;
 
 public class EventListener implements Listener {
@@ -18,15 +19,17 @@ public class EventListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
-        Location from = event.getFrom();
-        Location to = event.getTo();
-        Player player = event.getPlayer();
-        if (from.level.equals(to.level)) return;
+    public void onEntityLevelChange(EntityLevelChangeEvent event) {
+        Entity entity = event.getEntity();
+        if (!(entity instanceof Player)) return;
+        Player player = (Player) entity;
+        Level origin = event.getOrigin();
+        Level target = event.getTarget();
+        if (origin.equals(target)) return;
         plugin.setPlayerInfos(player);
-        int gamemode = plugin.getPlayerGamemode(player, to.level);
+        int gamemode = plugin.getPlayerGamemode(player, target);
         player.setGamemode(gamemode);
-        player.getInventory().setContents(plugin.getPlayerInventoryContents(player, gamemode, to.level));
+        player.getInventory().setContents(plugin.getPlayerInventoryContents(player, gamemode, target));
     }
 
     @EventHandler(ignoreCancelled = true)
