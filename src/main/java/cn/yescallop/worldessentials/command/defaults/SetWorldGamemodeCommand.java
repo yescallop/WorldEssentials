@@ -23,33 +23,30 @@ public class SetWorldGamemodeCommand extends CommandBase {
             sender.sendMessage(new TranslationContainer("commands.generic.usage", this.usageMessage));
             return false;
         }
-        String gamemodeStr;
         Level level;
         if (args.length > 1) {
-            level = plugin.getServer().getLevelByName(args[0]);
+            level = plugin.getServer().getLevelByName(args[1]);
             if (level == null) {
-                sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.level.notFound", args[0]));
+                sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.level.notFound", args[1]));
                 return true;
             }
-            gamemodeStr = args[1];
         } else {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.onlyInGame"));
                 return true;
             }
             level = ((Player) sender).getLevel();
-            gamemodeStr = args[0];
         }
-        int gamemode = Server.getGamemodeFromString(gamemodeStr);
+        int gamemode = Server.getGamemodeFromString(args[0]);
         if (gamemode == -1) {
-            sender.sendMessage(TextFormat.RED + lang.translateString("commands.setworldgamemode.unknownGamemode", gamemodeStr));
+            sender.sendMessage(TextFormat.RED + lang.translateString("commands.setworldgamemode.unknownGamemode", args[0]));
             return true;
         }
         plugin.setLevelGamemode(level, gamemode);
         for (Player levelPlayer : level.getPlayers().values()) {
-            levelPlayer.sendMessage(lang.translateString("commands.setworldgamemode.success", Server.getGamemodeString(gamemode)));
+            levelPlayer.sendMessage(lang.translateString("commands.setworldgamemode.success.others", Server.getGamemodeString(gamemode)));
         }
-        sender.sendMessage(lang.translateString("commands.setworldgamemode.success.others", new String[]{level.getName(), Server.getGamemodeString(gamemode)}));
+        sender.sendMessage(lang.translateString("commands.setworldgamemode.success", new String[]{level.getName(), Server.getGamemodeString(gamemode)}));
         return true;
     }
 }

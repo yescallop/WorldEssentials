@@ -9,13 +9,12 @@ permissions:
  worldessentials.command.gamerule:
   description: "Allows the user to use /gamerule command"
   default: op
- worldessentials.command.tpw.*:
+ worldessentials.command.tpw:
   description: "Allows the user to use /tpw command"
   default: true
-  children:
-   worldessentials.command.tpw.other:
-    description: "Allows the user to use /tpw command on the other"
-    default: op
+ worldessentials.command.tpw.other:
+  description: "Allows the user to use /tpw command on the other"
+  default: op
  worldessentials.command.setworldgamemode:
   description: "Allows the user to use /setworldgamemode command"
   default: op

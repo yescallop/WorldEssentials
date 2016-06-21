@@ -23,7 +23,6 @@ public class TpwCommand extends CommandBase {
             return false;
         }
         CommandSender target = sender;
-        String levelStr;
         if (args.length > 1) {
             if (!sender.hasPermission("worldessentials.command.tpw.other")) {
                 sender.sendMessage(new TranslationContainer(TextFormat.RED + "%commands.generic.permission"));
@@ -34,17 +33,15 @@ public class TpwCommand extends CommandBase {
                 sender.sendMessage(TextFormat.RED + lang.translateString("commands.tpw.player.notFound", args[1]));
                 return true;
             }
-            levelStr = args[0];
         } else {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.onlyPlayer"));
                 return true;
             }
-            levelStr = args[0];
         }
-        Level level = plugin.getServer().getLevelByName(levelStr);
+        Level level = plugin.getServer().getLevelByName(args[0]);
         if (level == null) {
-            sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.level.notFound", levelStr));
+            sender.sendMessage(TextFormat.RED + lang.translateString("commands.generic.level.notFound", args[0]));
             return true;
         }
         Player player = (Player) target;
