@@ -1,8 +1,8 @@
 package cn.yescallop.worldessentials.lang;
 
 import cn.nukkit.Server;
-import cn.nukkit.event.TextContainer;
-import cn.nukkit.event.TranslationContainer;
+import cn.nukkit.lang.TextContainer;
+import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.utils.Utils;
 
 import java.io.IOException;

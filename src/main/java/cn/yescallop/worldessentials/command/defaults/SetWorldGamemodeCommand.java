@@ -3,7 +3,7 @@ package cn.yescallop.worldessentials.command.defaults;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.event.TranslationContainer;
+import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.level.Level;
 import cn.nukkit.utils.TextFormat;
 import cn.yescallop.worldessentials.WorldEssentials;
